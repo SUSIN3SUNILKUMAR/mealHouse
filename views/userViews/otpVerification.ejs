@@ -1,0 +1,55 @@
+<!-- views/otpVerification.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link rel="stylesheet" href="/styles/otpVerification.css">
+</head>
+<body>
+    
+    <form id="otpForm" action="/otpVerification" method="post">
+        <div class="title">
+          <h3>OTP VERIFICATION</h3>
+          <p class="info">An OTP has been sent to <%=email%></p>
+          <p class="msg">Please enter OTP to verify</p>
+        </div>
+        <div class="otp-input-fields">
+            <% if (message) { %>
+                <p style="color: rgb(255, 115, 0);" class="error-message"><%= message %></p>
+            <% } %>
+          <input type="number" name="otp1" class="otp__digit otp__field__1" maxlength="1" oninput="moveToNext(this, 2)" required>
+          <input type="number" name="otp2" class="otp__digit otp__field__2" maxlength="1" oninput="moveToNext(this, 3)" required>
+          <input type="number" name="otp3" class="otp__digit otp__field__3" maxlength="1" oninput="moveToNext(this, 4)" required>
+          <input type="number" name="otp4" class="otp__digit otp__field__4" maxlength="1" oninput="moveToNext(this, 5)" required>
+          <input type="number" name="otp5" class="otp__digit otp__field__5" maxlength="1" oninput="moveToNext(this, 6)" required>
+          <input type="number" name="otp6" id="otp6" class="otp__digit otp__field__6" maxlength="1" oninput="moveToNext(this, null)" required>
+        </div>
+       <h2>The form will auto submit after the 6 digits are entered</h2>
+    </form>
+
+    <script>
+        function moveToNext(input, nextIndex) {
+            const maxLength = parseInt(input.getAttribute('maxlength'));
+
+            if (input.value.length >= maxLength && nextIndex !== null) {
+                const nextInput = document.querySelector(`.otp__field__${nextIndex}`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+
+            // Check if all OTP fields are filled
+            const otpInputs = document.querySelectorAll('.otp__digit');
+            const filledFields = Array.from(otpInputs).every(input => input.value.length === maxLength);
+
+            // If all OTP fields are filled, submit the form
+            if (filledFields) {
+                document.getElementById('otpForm').submit();
+            }
+        }
+    </script>
+</body>
+</html>
