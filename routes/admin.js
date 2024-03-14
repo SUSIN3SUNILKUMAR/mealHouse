@@ -12,13 +12,28 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
     cb(
       null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+      file.fieldname + "-" + uniqueSuffix + ext
     );
   },
 });
-const upload = multer({ storage: storage }).single('img');
+
+const imageFilter = function (req, file, cb) {
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|img)$/)) {
+    return cb(new Error("Only image files are allowed!"), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: imageFilter
+}).single('img');
+
+
 
 const checkSession = async (req, res, next) => {
   console.log("Reached the checkSession")
@@ -32,11 +47,30 @@ const checkSession = async (req, res, next) => {
   }
 };
 
+
+//! Authentication routes
 router.get("/login", controller.getLogin);
-router.get("/logout", controller.getLogout);
 router.post("/login", controller.postLogin);
-router.get("/dashboard", checkSession, controller.getAdminDashboard);
-router.get("/usermanagement",checkSession,controller.getUserManagement)
-router.get("/toggler/:user._id",checkSession,controller.getToggler)
+router.get("/logout", controller.getLogout);
+
+router.use(checkSession)
+
+//! Dashboard routes
+router.get("/dashboard",controller.getAdminDashboard);
+
+//! User Management routes
+router.get("/usermanagement", controller.getUserManagement);
+router.get("/blockuser/:id", controller.getBlockUser);
+
+//! Category Management routes
+router.get("/categorymanagement", controller.getCategoryManagement);
+router.get("/addcategory", controller.getCategory);
+router.post("/addcategory", controller.postCategory);
+router.get("/deletecategory/:id", controller.getDeleteCategory)
+router.get("/editcategory/:id",controller.getEditCategory)
+router.post("/editcategory/:id",controller.postEditCategory)
+
+//! Image management routes
+router.post('/deleteimage',controller.getDeleteImage)
+
 module.exports = router;
- 

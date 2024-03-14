@@ -5,6 +5,7 @@ const morgan=require('morgan')
 const mongoose = require('mongoose')
 const userRoute = require('./routes/user')
 const adminRoute = require('./routes/admin')
+const productRoutes = require('./routes/product')
 
 
 
@@ -17,6 +18,7 @@ const mongoURI = process.env.mongoURIString
 const secret = crypto.randomBytes(32).toString('hex')
 
 app.use(express.json());
+
 app.use(
     session({
       secret: secret,
@@ -24,6 +26,9 @@ app.use(
       saveUninitialized: true,
     })
 )
+
+
+
 app.use(morgan('tiny'))
 //mongodb connection
 mongoose.connect(mongoURI)
@@ -44,8 +49,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }))
 
 
-app.use('/', userRoute)
-app.use('/admin', adminRoute)
+app.use('/',userRoute)
+app.use('/admin',adminRoute)
+app.use('/admin',productRoutes)
 
 
 

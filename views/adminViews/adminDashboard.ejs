@@ -1,35 +1,129 @@
-<!-- views/adminDashboard.ejs -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="/styles/adminStyles/adminDashboard.css">
+    <title>Admin</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+    <style>
+        #sidebar {
+            background-color: #fff;
+            height: 86vh;
+        }
+
+        .custom-border {
+            border: 2px solid #3883f4;
+            border-radius: 5px;
+        }
+
+        .maindiv {
+            height: 86vh;
+            overflow-y: scroll;
+        }
+
+        #sidebar a.nav-link:hover {
+            color: #3883f4 !important;
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <h1>Admin Dashboard</h1>
-        <nav>
-            <ul>
-                <li><a href="/admin/usermanagement">Manage Users</a></li>
-                <li><a href="/admin/products">Manage Products</a></li>
-                <li><a href="/admin/orders">Manage Orders</a></li>
-               
-            </ul>
-        </nav>
-    </header>
 
-    <section class="overview">
-        <h2>Overview</h2>
+<body class="bg-light">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand text-primary" href="#">Admin</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row mt-4 ml-2">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-4 col-lg-2 d-md-block sidebar custom-border">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-primary" href="/admin/dashboard">
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/usermanagement">
+                                User Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/productmanagement">
+                                Product Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/categorymanagement">
+                                Category Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/order/ordermanagement">
+                                Order Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/offermanagement">
+                                Offer Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/couponmanagement">
+                                Coupon Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/bannermanagement">
+                                Banner Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/logout">
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-8 col-lg-10">
+                <div class="custom-border maindiv p-5">
+                    <div class="container ">
+                       
+                 
+
+     
+
+          <div><h2>Hello this is the dashboard </h2>
+      </div>
+      <div><h2>use the side menu to travel to routes</h2></div>
+
+                    </div>
+                </div>
+                
+            </main>
+        </div>
+    </div>
+
     
-    </section>
+ 
+    
 
-    <!-- Add more sections for additional dashboard components -->
-
-    <footer>
-        <p>&copy; 2024 Your Admin Dashboard. All rights reserved.</p>
-    </footer>
+    <!-- Include Bootstrap JS (jQuery and Popper.js required) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

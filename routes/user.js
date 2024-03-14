@@ -39,18 +39,7 @@ router.post('/userSignup', controller.postRegistration)
 router.get('/otpVerification', controller.getOtpVerification)
 router.post('/otpVerification', controller.postOtpVerification)
 router.get('/logout', controller.getLogout)
-router.get('/forgotpassword', controller.getForgotPassword)
-router.post('/forgotpassword', controller.postForgotPassword)
-router.get('/forgotpswotpverify', controller.getFgtPswOtpVerify)
-router.post('/forgotpswotpverify', controller.postFgtPswOtpVerify)
-router.get('/newpassword', controller.getNewPassword)
-router.post('/newpassword', controller.postNewPassword)
-router.get('/userprofile/:id', checkSessionAndBlocked, controller.getProfile)
 
 
-router.get('/search', controller.getSearch)
-router.get('/shop', checkSessionAndBlocked, controller.getShop)
-router.get('/shop/:category', checkSessionAndBlocked, controller.getShopByCategory)
-router.post('/sortProducts', controller.postSortProducts)
 
 module.exports = router  

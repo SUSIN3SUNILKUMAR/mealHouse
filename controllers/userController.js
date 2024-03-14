@@ -15,10 +15,7 @@ module.exports = {
   getLogin: (req, res) => {
     console.log('reached the login route')
     if (req.session.userId) {
-      console.log("reached inside the login if condition")
-      console.log('below this is the req.session.userId')
-      console.log(req.session.userId)
-      //Redirect to homepage if authenticated
+   
       res.redirect("/userHome");
     } else { 
       res.render("userViews/userLogin",{message:null});
@@ -27,6 +24,7 @@ module.exports = {
 
   getLogout: (req, res) => {
     try {
+     
       req.session.destroy((err) => {
         if (err) {
           console.error("Error destroying session:", err);
@@ -45,46 +43,61 @@ module.exports = {
     const { email, password } = req.body;
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordPattern = /^.{1,}$/;
+
+    // Check if email and password meet the required patterns
     if (!emailPattern.test(email) || !passwordPattern.test(password)) {
-      res.render("userViews/userLogin", {
-        message: "Email and password should be valid!",
-      });
-    } else {
-      try {
+        return res.render("userViews/userLogin", {
+            message: "Email and password should be valid!"
+        });
+    }
+
+    try {
         const user = await User.findOne({ email: email });
-        if (user != null) {
-          //Checking password match
-          if (password === user.password) {
-            if (!user.isBlocked) {
-              //Adding session details
-              req.session.userId = user._id;
-              req.session.username = user.username;
-              res.redirect("/userhome");
-            } else {
-              res.render("userViews/userLogin", {
-                message: "This account is blocked!",
-              });
-            }
-          } else {
-            res.render("userViews/userLogin", {
-              message: "login failed, Incorrect password!",
+
+        // If user not found, render with a message to sign up
+        if (!user) {
+            return res.render("userViews/userLogin", {
+                message: "Email not found. Please sign up!"
             });
-          }
-        } else {
-          res.render("userViews/userlogin", { message: "login failed!" });
         }
-      } catch (err) {
+
+        // Checking password match
+        if (password === user.password) {
+            if (!user.isBlocked) {
+                // Adding session details
+                req.session.userId = user._id;
+                req.session.userName = user.username;
+                console.log("this is the user name", req.session.userName);
+                return res.redirect("/userhome");
+            } else {
+                return res.render("userViews/userLogin", {
+                    message: "This account is blocked!"
+                });
+            }
+        } else {
+            return res.render("userViews/userLogin", {
+                message: "Login failed. Incorrect password!"
+            });
+        }
+    } catch (err) {
         console.error(err);
         return res.status(500).send("Error in login.");
-      }
     }
-  },
+}
+,
 
   getHome: async (req, res) => {
     try {
       const userId = req.session.userId;
+      const products = await Product.find({
+        isListed: true,
+        stock: {$gt:0}
+      })
+
+
+
       console.log('reached the gethome page')
-      res.render("userViews/userHome");
+      res.render("userViews/userHome",{products,userId});
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to get homepage. Please try again.");
@@ -271,244 +284,5 @@ module.exports = {
     } else { 
         res.render("userViews/otpVerification", { message: "OTP is incorrect! Try again.",email:req.session.data.email});
     }
-}, 
- 
-  getForgotPassword: (req, res) => {
-    try {
-      res.render("userViews/forgotpassword");  
-    } catch (err) {
-      console.log(err);
-    }
-  },
-
-  postForgotPassword: async (req, res) => {
-    const email = req.body.email;
-    const user = await User.findOne({ email: email });
-    if (user != null) {
-      req.session.email = email;
-      //OTP generator
-      const generateOTP = (length) => {
-        const digits = "0123456789";
-        let OTP = "";
-
-        for (let i = 0; i < length; i++) {
-          const randomIndex = crypto.randomInt(0, digits.length);
-          OTP += digits[randomIndex];
-        }
-
-        return OTP;
-      };
-
-      //EmailSending
-      const sendOtpEmail = async (email, otp) => {
-        // console.log(process.env.EMAIL_USER)
-        // console.log(process.env.EMAIL_PASSWORD)
-        const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        });
-        const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: "One-Time Password (OTP) for Authentication  for ECart",
-          text: `Your Authentication OTP is: ${otp}`,
-        };
-
-        transporter.sendMail(mailOptions, async (error, info) => {
-          if (error) {
-            return console.error("Error:", error);
-          }
-          console.log("Email sent:", info.response);
-        });
-      };
-
-      const otp = generateOTP(6);
-      req.session.otp = otp;
-      await sendOtpEmail(email, otp);
-      res.redirect("userViews/forgotpswotpverify");
-    } else {
-      res.render("userViews/forgotpassword", { message: "Email not registered!" });
-    }
-  },
-
-  getFgtPswOtpVerify: async (req, res) => {
-    try {
-      res.render("fpotpverification");
-    } catch (err) {
-      console.log(err);
-    }
-  },
-
-  postFgtPswOtpVerify: async (req, res) => {
-    if (req.body.otp === req.session.otp) {
-      res.redirect("/newpassword");
-    } else {
-      res.render("fpotpverification", { message: "OTP icorrect!" });
-    }
-  },
-
-  getNewPassword: async (req, res) => {
-    try {
-      res.render("newpassword");
-    } catch (err) {
-      console.log(err);
-    } 
-  },
-
-  postNewPassword: async (req, res) => {
-    if (req.body.password === req.body.cpassword) {
-      await User.updateOne(
-        { email: req.session.email },
-        { $set: { password: req.body.password } }
-      );
-      res.redirect("/");
-    } else {
-      res.render("newpassword", { message: "Entered same password!" });
-    }
-  },
-
-  getProfile: async (req, res) => {
-    try {
-      const id = req.params.id;
-      const user = await User.findOne({ _id: id });
-      res.render("userprofile", { user });
-    } catch (err) {
-      console.log(err);
-    }
-  },
-
-
-  getSearch: async (req, res) => {
-    // try {
-    //   const searchQuery = req.query.search;
-    //   let filter = {};
-
-    //   if (searchQuery) {
-    //     const regexPattern = new RegExp(searchQuery, "i");
-    //     filter = { productname: { $regex: regexPattern } };
-    //     const filteredProducts = await Product.find(filter);
-    //     res.json(filteredProducts);
-    //   } else {
-    //     const firstFourProducts = await Product.find({}).limit(4);
-    //     res.json(firstFourProducts);
-    //   }
-    // } catch (err) {
-    //   console.log(err);
-    //   res.status(500).json({ error: "Internal Server Error" });
-    // }
-    try {
-      const searchQuery = req.query.search;
-      let productFilter = {};
-      let categoryFilter = {};
-
-      if (searchQuery) {
-        const regexPattern = new RegExp(searchQuery, "i");
-
-        // Find products matching the query
-        productFilter = { productname: { $regex: regexPattern } };
-
-        // Find categories matching the query
-        categoryFilter = { category: { $regex: regexPattern } };
-      }
-
-      const matchingProducts = await Product.find(productFilter).populate(
-        "category"
-      );
-      const matchingCategories = await Category.find(categoryFilter);
-      const response = {
-        products: matchingProducts,
-        categories: matchingCategories,
-      };
-
-      res.json(response);
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ error: "Error while searaching." });
-    }
-  },
-
-  getShop: async (req, res) => {
-    try {
-      const userId = req.session.userId;
-      const productsByCategory = await Product.aggregate([
-        {
-          $match: { isListed: true, stock: { $gt: 0 } },
-        },
-        {
-          $lookup: {
-            from: "categories",
-            localField: "category",
-            foreignField: "_id",
-            as: "categoryInfo",
-          },
-        },
-        {
-          $unwind: "$categoryInfo",
-        },
-        {
-          $group: {
-            _id: "$categoryInfo.category",
-            products: {
-              $push: "$$ROOT",
-            },
-          },
-        },
-      ]);
-      const products = await Product.find({
-        isListed: true,
-        stock: { $gt: 0 },
-      });
-      const wishlistItems = await Wsihlist.find({ userid: req.session.userId });
-      const wishlistProductIds = wishlistItems.map((item) => item.productid);
-
-      const wishlistProducts = await Product.find({
-        _id: { $in: wishlistProductIds },
-      }).select('productname');
-      res.render("shop", { products, productsByCategory, userId, wishlistProducts });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Error getting shop.");
-    }
-  },
-
-  getShopByCategory: async (req, res) => {
-    try {
-      const userId = req.session.userId;
-      const categoryName = req.params.category;
-      const category = await Category.findOne({ category: categoryName });
-      const products = await Product.find({ category: category._id });
-      const wishlistItems = await Wsihlist.find({ userid: req.session.userId });
-      const wishlistProductIds = wishlistItems.map((item) => item.productid);
-
-      const wishlistProducts = await Product.find({
-        _id: { $in: wishlistProductIds },
-      }).select('productname');
-      res.render("shopbycategory", { products, userId, categoryName, wishlistProducts });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Error getting shop by category.");
-    }
-  },
-
-  postSortProducts: async (req, res) => {
-    try {
-      let products
-      const categoryDetails = await Category.findOne({ category: req.body.category })
-      const wishlist = await Wsihlist.find()
-      if(req.body.order == 'asc') {
-        products = await Product.find({ category: categoryDetails._id }).sort({ price: 1 });
-      } else if(req.body.order == 'desc') {
-        products = await Product.find({ category: categoryDetails._id }).sort({ price: -1 });
-      } else {
-        products = await Product.find({ category: categoryDetails._id });
-      }
-      res.json({ products: products, wishlist });
-    } catch (err) {
-      console.log("Error sorting products: ", err);
-    }
-  },
-
+}
 };

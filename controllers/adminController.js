@@ -9,6 +9,7 @@ require("dotenv").config();
 module.exports = {
   getLogin: (req, res) => {
     try {
+      console.log("reached login route for admin")
       if (req.session.admin) {
         //Redirect to dashboard if authenticated
         res.redirect("/admin/dashboard");
@@ -24,13 +25,15 @@ module.exports = {
   postLogin: (req, res) => {
     const { username, password } = req.body;
     const admin = {
-      username: "admin",
-      password: "admin@567",
+      username: "susin",
+      password: "admin",
     };
 
     if (username === admin.username && password === admin.password) {
       req.session.admin = admin.username;
-      // res.render("admindashboard", { admin: admin.username, users });
+     console.log('this is the admin name',req.session.admin)
+     console.log('this is the user id ',req.session.userId)
+     
       res.redirect("/admin/dashboard");
     } else {
       res.render("adminViews/adminLogin", { message: "login failed! try again" });
@@ -39,11 +42,14 @@ module.exports = {
 
   getLogout: (req, res) => {
     try {
+      console.log('reached inside the get logout of ADMIN side')
+      console.log('user session ', req.session.userId)
+      console.log('admin session id ', req.session.admin)
       req.session.destroy((err) => {
         if (err) {
           console.log("Error distroying session: ", err);
         } else {
-          res.redirect("/adminLogin");
+          res.redirect("/admin/login");
         }
       });
     } catch (err) {
@@ -78,48 +84,20 @@ module.exports = {
   getCategoryManagement: async (req, res) => {
     try {
       const categories = await Category.find();
-      res.render("categorymanagement", { categories });
+      res.render("adminViews/categoryManagement", { categories });
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to fetch categories. Please try again.");
     }
   },
 
-  getCouponManagement: async (req, res) => {
-    try {
-      const coupons = await Coupon.find();
-      res.render("coupenmanagement", { coupons });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to fetch coupons. Please try again.");
-    }
-  },
 
-  getOfferManagement: async (req, res) => {
-    try {
-      const offers = await Offer.find();
-      res.render("offermanagement", { offers });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to fetch offers. Please try again.");
-    }
-  },
-
-  getBannerManagement: async (req, res) => {
-    try {
-      const banners = await Banner.find();
-      res.render("bannermanagement", { banners });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to fetch offers. Please try again.");
-    }
-  },
-
-  getToggler: async (req, res) => {
+  getBlockUser: async (req, res) => {
     try {
       console.log("reached toggler")
 
       const user = await User.findOne({ _id: req.params.id });
+      console.log(user)
       user.isBlocked = !user.isBlocked;
       user.save();
       res.redirect("/admin/usermanagement");
@@ -131,41 +109,13 @@ module.exports = {
 
   getCategory: async (req, res) => {
     try {
-      res.render("addcategory");
+      res.render("adminViews/addCategory");
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to get category edit page.");
     }
   },
 
-  getCoupon: async (req, res) => {
-    try {
-      res.render("addcoupen");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to get addcoupon page.");
-    }
-  },
-
-  getOffer: async (req, res) => {
-    try {
-      const products = await Product.find()
-      const categories = await Category.find()
-      res.render("addoffer", { categories, products });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to get addoffer page.");
-    }
-  },
-
-  getBanner: async (req, res) => {
-    try {
-      res.render("addbanner");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to get addbanner page.");
-    }
-  },
 
   getDeleteCategory: async (req, res) => {
     try {
@@ -178,75 +128,25 @@ module.exports = {
     }
   },
 
-  getDeleteCoupon: async (req, res) => {
-    try {
-      const couponId = req.params.id;
-      await Coupon.findByIdAndDelete(couponId);
-      res.redirect("/admin/couponmanagement");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to delete coupon");
-    }
-  },
 
-  getDeleteOffer: async (req, res) => {
-    try {
-      const offerId = req.params.id;
-      await Offer.findByIdAndDelete(offerId);
-      res.redirect("/admin/offermanagement");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to delete offer");
-    }
-  },
-
-  getDeleteBanner: async (req, res) => {
-    try {
-      const bannerId = req.params.id;
-      await Banner.findByIdAndDelete(bannerId);
-      res.redirect("/admin/bannermanagement");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to delete banner");
-    }
-  },
-
-  getDeleteCoupon: async (req, res) => {
-    try {
-      const couponId = req.params.id;
-      await Coupon.findByIdAndDelete(couponId);
-      res.redirect("/admin/couponmanagement");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to delete coupon");
-    }
-  },
 
   getEditCategory: async (req, res) => {
     try {
       const id = req.params.id;
       const category = await Category.findOne({ _id: id });
-      res.render("editcategory", { category: category });
+      res.render("adminViews/editCategory", { category: category });
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to display the category edit page.");
     }
   },
 
-  getEditCoupon: async (req, res) => {
-    try {
-      const id = req.params.id;
-      const coupon = await Coupon.findOne({ _id: id });
-      res.render("editcoupon", { coupon: coupon });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to display the coupon edit page.");
-    }
-  },
 
   postEditCategory: async (req, res) => {
     const id = req.params.id;
     const categoryname = req.body.categoryname;
+    console.log(`this is the id ${id} and
+     this is the categoryname ${categoryname}`)
     try {
       await Category.updateOne(
         { _id: id },
@@ -259,22 +159,10 @@ module.exports = {
     res.redirect("/admin/categorymanagement");
   },
 
-  postEditCoupen: async (req, res) => {
-    const id = req.params.id;
-    const { coupencode, discount, expiryDate, limit } = req.body;
-    try {
-      await Coupon.updateOne(
-        { _id: id },
-        { $set: { code: coupencode, discount: discount, expiryDate: expiryDate, limit: limit } }
-      );
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to edit coupen.");
-    }
-    res.redirect("/admin/couponmanagement");
-  },
+
 
   postCategory: async (req, res) => {
+    console.log("reached post category")
     const category = req.body.categoryname;
     const isthere = await Category.findOne({ category: category });
     if (isthere === null) {
@@ -293,60 +181,6 @@ module.exports = {
     }
   },
 
-  postCoupen: async (req, res) => {
-    const { coupencode, discount, expiryDate, limit } = req.body;
-    const isthere = await Coupon.findOne({ code: coupencode });
-    if (isthere === null) {
-      try {
-        const newCoupen = new Coupon({
-          code: coupencode,
-          discount: discount,
-          expiryDate: expiryDate,
-          limit: limit,
-        });
-        newCoupen.save();
-      } catch (err) {
-        console.error(err);
-        return res.status(500).send("Error inserting coupon");
-      }
-      res.redirect("/admin/couponmanagement");
-    } else {
-      res.render("addcategory", { message: "Category already exist!" });
-    }
-  },
-  postBanner: async (req, res) => {
-    const newBanner = new Banner({
-      image: req.file.path.substring(6),
-    })
-    newBanner.save()
-    res.redirect("/admin/bannermanagement");
-  },
-
-  postOffer: async (req, res) => {
-    const { product, category, discount, expiryDate } = req.body;
-    const isthere = await Offer.findOne({ $or: [ { applicableProduct: product }, { applicableCategorie: category } ] });
-    if (isthere === null) {
-      try {
-        const newOffer = new Offer({
-          applicableProduct: product,
-          applicableCategorie: category,
-          discount: discount,
-          expiryDate: expiryDate,
-          isActive: true,
-
-        });
-        newOffer.save();
-      } catch (err) {
-        console.error(err);
-        return res.status(500).send("Error inserting offer");
-      }
-      res.redirect("/admin/offermanagement");
-    } else {
-      const products = await Product.find()
-      const categories = await Category.find()
-      res.render("addoffer", { message: "Offer already exist!", products, categories });
-    }
-  },
 
   getUnlistProduct: async (req, res) => {
     const product = await Product.findOne({ _id: req.params.id });
@@ -360,161 +194,7 @@ module.exports = {
     res.redirect("/admin/productmanagement");
   },
 
-  getGeneratePdf: async (req, res) => {
-    try {
-      const startingDate = new Date(req.query.startingdate);
-      const endingDate = new Date(req.query.endingdate);
-  
-      // Fetch orders within the specified date range
-      const orders = await Order.find({
-        orderdate: { $gte: startingDate, $lte: new Date(endingDate.getTime() + 86400000) },
-        "products.status": "Delivered",
-      });
-      let addressDetails
-      for(let address of orders){
-          addressDetails = await Address.findById(address.addressid);
-        ;
-      }
-      console.log(orders)
-      // Create a PDF document
-      const doc = new PDFDocument();
-      const filename = "sales_report.pdf";
-  
-      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-      res.setHeader("Content-Type", "application/pdf");
-  
-      doc.pipe(res);
-  
-      // Add content to the PDF document
-      doc.text("Sales Report", { align: "center", fontSize: 10, margin: 2 });
-  
-      // Define the table data
-      const tableData = {
-        headers: [
-          "Username",
-          "Product Name",
-          "Price",
-          "Quantity",
-          "Address",
-          "City",
-          "Pincode",
-          "Phone",
-        ],
-        // rows: orders.map((order) => [
-        //   order.user,
-        //   order.products.map((product) => product.product).join(", "),
-        //   order.products.map((product) => product.price).join(", "),
-        //   order.products.map((product) => product.quantity).join(", "),
-        //   addressDetails.address,
-        //   addressDetails.city,
-        //   addressDetails.pincode,
-        //   addressDetails.phone,
-        // ]),
-        rows: orders.map(order => [
-          order.user,
-          order.products
-            .filter(product => product.status === "Delivered")
-            .map(product => product.product)
-            .join(", "),
-          order.products
-            .filter(product => product.status === "Delivered")
-            .map(product => product.price)
-            .join(", "),
-          order.products
-            .filter(product => product.status === "Delivered")
-            .map(product => product.quantity)
-            .join(", "),
-          addressDetails.address,
-          addressDetails.city,
-          addressDetails.pincode,
-          addressDetails.phone,
-        ]),
-
-      };
-  
-      // Draw the table
-      await doc.table(tableData, {
-        prepareHeader: () => doc.font("Helvetica-Bold"),
-        prepareRow: () => doc.font("Helvetica"),
-      });
-  
-      // Finalize the PDF document
-      doc.end();
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      res.status(500).send("Internal Server Error");
-    }
-  },
-
-  getExcelReprot: async (req, res) => {
-    try {
-      const startdate = new Date(req.query.startingdate);
-      const Endingdate = new Date(req.query.endingdate);
-      Endingdate.setDate(Endingdate.getDate() + 1);
-  
-      const orderCursor = await Order.aggregate([
-        {
-          $match: {
-            orderdate: { $gte: startdate, $lte: Endingdate }
-          }
-        }
-      ]);
-      console.log(orderCursor)
-  
-      if (orderCursor.length === 0) {
-        return res.redirect('/admin/salesreport');
-      }
-  
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Sheet 1');
-  
-      // Add data to the worksheet
-      worksheet.columns = [
-        { header: 'Username', key: 'username', width: 15 },
-        { header: 'Product Name', key: 'productname', width: 20 },
-        { header: 'Quantity', key: 'quantity', width: 15 },
-        { header: 'Price', key: 'price', width: 15 },
-        { header: 'Status', key: 'status', width: 15 },
-        { header: 'Order Date', key: 'orderdate', width: 18 },
-        { header: 'Address', key: 'address', width: 30 },
-        { header: 'City', key: 'city', width: 20 },      // Add City column
-        { header: 'Pincode', key: 'pincode', width: 15 }, // Add Pincode column
-        { header: 'Phone', key: 'phone', width: 15 }      // Add Phone column
-      ];
-  
-      for (const orderItem of orderCursor) {
-        const addressDetails = await Address.findById(orderItem.addressid);
-      for (const product  of orderItem.products) {
-        if (product.status === "Delivered") {
-          worksheet.addRow({
-            'username': orderItem.user,
-            'productname': product.product,
-            'quantity': product.quantity,
-            'price': product.price,
-            'status': product.status,
-            'orderdate': orderItem.orderdate,
-            'address': addressDetails ? addressDetails.address : 'N/A',
-            'city': addressDetails ? addressDetails.city : 'N/A',
-            'pincode': addressDetails ? addressDetails.pincode : 'N/A',
-            'phone': addressDetails ? addressDetails.phone : 'N/A'
-          });
-        }
-      }
-    }
-  
-      // Generate the Excel file and send it as a response
-      workbook.xlsx.writeBuffer().then((buffer) => {
-        const excelBuffer = Buffer.from(buffer);
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=excel.xlsx');
-        res.send(excelBuffer);
-      });
-    } catch (error) {
-      console.error('Error creating or sending Excel file:', error);
-      res.status(500).send('Internal Server Error');
-    }
-  },
-
+ 
   getDeleteImage: async (req, res) => {
     try {
       const id = req.body.productid;
@@ -524,7 +204,7 @@ module.exports = {
       await product.save()
     } catch (err) {
       console.error(err);
-      return res.status(500).send("Failed to display the coupon edit page.");
+      return res.status(500).send("Failed to display the page.");
     }
   },
 

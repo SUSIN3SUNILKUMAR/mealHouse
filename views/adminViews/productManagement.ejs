@@ -17,6 +17,7 @@
 
         .maindiv{
             height: 86vh;
+            overflow-y: scroll;
         }
 
         #sidebar a.nav-link:hover {
@@ -46,12 +47,12 @@
                             </a>
                         </li>
                         <li class="nav-item mt-4">
-                            <a class="nav-link text-primary" href="/admin/usermanagement">
+                            <a class="nav-link text-dark" href="/admin/usermanagement">
                                 User Management
                             </a>
                         </li>
                         <li class="nav-item mt-4">
-                            <a class="nav-link text-dark" href="/admin/productmanagement">
+                            <a class="nav-link text-primary" href="/admin/productmanagement">
                                 Product Management
                             </a>
                         </li>
@@ -76,6 +77,11 @@
                             </a>
                         </li>
                         <li class="nav-item mt-4">
+                            <a class="nav-link text-dark" href="/admin/bannermanagement">
+                                Banner Management
+                            </a>
+                        </li>
+                        <li class="nav-item mt-4">
                             <a class="nav-link text-dark" href="/admin/logout">
                                 Logout
                             </a>
@@ -85,43 +91,63 @@
             </nav>
 
             <!-- Main Content -->
-            <main class="col-md-8 col-lg-10 col-sm-12">
+            <main class="col-md-8 col-lg-10">
                 <div class="custom-border maindiv p-5">
+                    <a href="/admin/addproduct" class="btn btn-primary mb-4">Add Product</a>
                     <div class="container ">
                         <!-- Add your user data tables here -->
                         <table class="table ">
                             <thead>
                                 <tr>
-                                    <th>Username</th>
-                                    <th>Email</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Price</th>       
+                                    <th>Image</th>
+                                    <th>Stock</th>
                                     <th>Status</th>
-                                    <th>Block/Unblock</th>
+                                    <th>List/UnList</th>
+                                    <th>Action</th>
                                     <!-- Add more table headers as needed -->
                                 </tr>
                             </thead>
                             <tbody id="userTableBody">
-                                <% if(users.length> 0) { %>
-                                    <% users.forEach( user=> { %>
+                                <% if( products.length > 0) { %>
+                                    <% products.forEach( product=> { %>
                                         <tr>
                                             <td>
-                                                <%= user.username %>
+                                                <%= product.productname %>
                                             </td>
                                             <td>
-                                                <%= user.email %>
+                                                <%= product.category.category %>
                                             </td>
                                             <td>
-                                                <% if (user.isBlocked) { %>
-                                                    <span class="text-danger">Blocked</span>
+                                                <%= product.price %>
+                                            </td>
+                                           
+                                            <td>
+                                                <img style="max-height: 50px; max-width: 50px;" src="<%= product.image[0] %>" alt="no img">
+
+                                            </td>
+                                            <td>
+                                                <%= product.stock %>
+                                            </td>
+                                            <td>
+                                                <% if (product.isListed) { %>
+                                                    <span class="text-success">Listed</span>
                                                 <% } else { %>
-                                                    <span class="text-success">Not Blocked</span>
+                                                    <span class="text-danger">Not Listed</span>
                                                 <% } %>
                                             </td>
                                             <td>
-                                                <% if (user.isBlocked) { %>
-                                                    <a href="/admin/blockuser/<%= user._id %>" class="btn btn-success">Unblock</a>
+                                                <% if (product.isListed) { %>
+                                                    <a href="/admin/unlistproduct/<%= product._id %>" class="btn btn-danger">UnList</a>
                                                 <% } else { %>
-                                                    <a href="/admin/blockuser/<%= user._id %>" class="btn btn-danger">Block</a>
+                                                    <a href="/admin/unlistproduct/<%= product._id %>" class="btn btn-success">List</a>
                                                 <% } %>
+                                            </td>
+                                            <td>
+                                                <!-- Edit Button -->
+                                                <a href="/admin/editproduct/<%= product._id %>" class="btn btn-primary">Edit</a>
                                             </td>
                                         </tr>
                                         <% }); %>
@@ -134,7 +160,7 @@
         </div>
     </div>
 
-    <!-- footer -->
+    <!-- footer --> 
     <div class="mt-4">
     </div>
 
