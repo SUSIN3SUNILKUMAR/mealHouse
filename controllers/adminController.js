@@ -14,7 +14,7 @@ module.exports = {
         //Redirect to dashboard if authenticated
         res.redirect("/admin/dashboard");
       } else {
-        res.render("adminViews/adminLogin",{message:null});
+        res.render("adminViews/adminLogin", { message: null });
       }
     } catch (err) {
       console.error("Error in getLogout:", err);
@@ -31,9 +31,9 @@ module.exports = {
 
     if (username === admin.username && password === admin.password) {
       req.session.admin = admin.username;
-     console.log('this is the admin name',req.session.admin)
-     console.log('this is the user id ',req.session.userId)
-     
+      console.log('this is the admin name', req.session.admin)
+      console.log('this is the user id ', req.session.userId)
+
       res.redirect("/admin/dashboard");
     } else {
       res.render("adminViews/adminLogin", { message: "login failed! try again" });
@@ -64,7 +64,7 @@ module.exports = {
     try {
       console.log("Reached the admin dashboard")
       res.render('adminViews/adminDashboard');
-  
+
     } catch (error) {
       console.error('Error fetching and aggregating orders:', error);
       res.status(500).send('Internal Server Error');
@@ -81,17 +81,6 @@ module.exports = {
     }
   },
 
-  getCategoryManagement: async (req, res) => {
-    try {
-      const categories = await Category.find();
-      res.render("adminViews/categoryManagement", { categories });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to fetch categories. Please try again.");
-    }
-  },
-
-
   getBlockUser: async (req, res) => {
     try {
       console.log("reached toggler")
@@ -107,7 +96,20 @@ module.exports = {
     }
   },
 
-  getCategory: async (req, res) => {
+  getCategoryManagement: async (req, res) => {
+    try {
+      const categories = await Category.find();
+      res.render("adminViews/categoryManagement", { categories });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Failed to fetch categories. Please try again.");
+    }
+  },
+
+
+
+
+  getAddCategory: async (req, res) => {
     try {
       res.render("adminViews/addCategory");
     } catch (err) {
@@ -116,11 +118,38 @@ module.exports = {
     }
   },
 
+  postAddCategory: async (req, res) => {
+    
+    const newcategoryname = req.body.newcategoryname.trim().toLowerCase();
+    const checkingForSameCategoryInDB = await Category.findOne({ category: newcategoryname })
+
+    try {
+      if (checkingForSameCategoryInDB) {
+      return  res.render("adminViews/editCategory", {placeholder:"Please use another name : )", category:null,id:id, message: "Category name already exists please choose another name" })
+      } else {
+
+        
+
+        await Category.updateOne(
+          { _id: id },
+          { $set: { category: newcategoryname } }
+        );
+
+      }
+      
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Failed to edit category.");
+    }
+    res.redirect("/admin/categorymanagement");
+  },
+
 
   getDeleteCategory: async (req, res) => {
     try {
       const categoryId = req.params.id;
       await Category.findByIdAndDelete(categoryId);
+      await Product.deleteMany({ category: categoryId });
       res.redirect("/admin/categorymanagement");
     } catch (err) {
       console.error(err);
@@ -133,8 +162,10 @@ module.exports = {
   getEditCategory: async (req, res) => {
     try {
       const id = req.params.id;
-      const category = await Category.findOne({ _id: id });
-      res.render("adminViews/editCategory", { category: category });
+      const { category, _id } = await Category.findOne({ _id: id });
+
+
+      res.render("adminViews/editCategory", { category, id,placeholder:null });
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to display the category edit page.");
@@ -144,14 +175,23 @@ module.exports = {
 
   postEditCategory: async (req, res) => {
     const id = req.params.id;
-    const categoryname = req.body.categoryname;
-    console.log(`this is the id ${id} and
-     this is the categoryname ${categoryname}`)
+    const newcategoryname = req.body.newcategoryname.trim().toLowerCase();
+    const checkingForSameCategoryInDB = await Category.findOne({ category: newcategoryname })
+
     try {
-      await Category.updateOne(
-        { _id: id },
-        { $set: { category: categoryname } }
-      );
+      if (checkingForSameCategoryInDB) {
+      return  res.render("adminViews/editCategory", {placeholder:"Please use another name : )", category:null,id:id, message: "Category name already exists please choose another name" })
+      } else {
+
+        
+
+        await Category.updateOne(
+          { _id: id },
+          { $set: { category: newcategoryname } }
+        );
+
+      }
+      
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to edit category.");
@@ -161,25 +201,6 @@ module.exports = {
 
 
 
-  postCategory: async (req, res) => {
-    console.log("reached post category")
-    const category = req.body.categoryname;
-    const isthere = await Category.findOne({ category: category });
-    if (isthere === null) {
-      try {
-        const newCategory = new Category({
-          category: category,
-        });
-        newCategory.save();
-      } catch (err) {
-        console.error(err);
-        return res.status(500).send("Error inserting category");
-      }
-      res.redirect("/admin/categorymanagement");
-    } else {
-      res.render("addcategory", { message: "Category already exist!" });
-    }
-  },
 
 
   getUnlistProduct: async (req, res) => {
@@ -194,7 +215,7 @@ module.exports = {
     res.redirect("/admin/productmanagement");
   },
 
- 
+
   getDeleteImage: async (req, res) => {
     try {
       const id = req.body.productid;

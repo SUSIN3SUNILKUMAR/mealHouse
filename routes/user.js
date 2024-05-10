@@ -28,14 +28,20 @@ const checkSessionAndBlocked = async (req, res, next) => {
     }
   };
 
+//! Authentication routes
 router.get('/', controller.getLogin)
 router.post('/', controller.postLogin)
 
+//!home routes
 router.get('/userHome', checkSessionAndBlocked, controller.getHome)
+router.get('/product/:id', checkSessionAndBlocked, controller.getProduct)
 
+//!signup routes
 router.get('/userSignup', controller.getRegistration)
 router.post('/userSignup', controller.postRegistration)
 
+
+//!otpVerification routes
 router.get('/otpVerification', controller.getOtpVerification)
 router.post('/otpVerification', controller.postOtpVerification)
 router.get('/logout', controller.getLogout)

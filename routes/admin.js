@@ -36,14 +36,14 @@ const upload = multer({
 
 
 const checkSession = async (req, res, next) => {
-  console.log("Reached the checkSession")
+  
   if (req.session.admin) { 
-    console.log("session found")
+    
     next();
   } else {
     // No userId in session, redirect to the default page
     res.redirect("/admin/login");
-   console.log("No session is found ")
+   
   }
 };
 
@@ -55,6 +55,7 @@ router.get("/logout", controller.getLogout);
 
 router.use(checkSession)
 
+
 //! Dashboard routes
 router.get("/dashboard",controller.getAdminDashboard);
 
@@ -64,8 +65,8 @@ router.get("/blockuser/:id", controller.getBlockUser);
 
 //! Category Management routes
 router.get("/categorymanagement", controller.getCategoryManagement);
-router.get("/addcategory", controller.getCategory);
-router.post("/addcategory", controller.postCategory);
+router.get("/addcategory", controller.getAddCategory);
+router.post("/addcategory", controller.postAddCategory);
 router.get("/deletecategory/:id", controller.getDeleteCategory)
 router.get("/editcategory/:id",controller.getEditCategory)
 router.post("/editcategory/:id",controller.postEditCategory)

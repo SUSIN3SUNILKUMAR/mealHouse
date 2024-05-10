@@ -1,6 +1,8 @@
 const User = require("../models/userModel");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
+const path   = require('path');
+const fs = require('fs'); 
 
 
 module.exports = {
@@ -17,9 +19,9 @@ module.exports = {
 
   getProductManagement: async (req, res) => {
     try {
-      console.log("reached product get route")
+      
       const products = await Product.find({}).populate("category");
-      console.log('pr list',products);
+     
       res.render("adminViews/productManagement", { products });
     } catch (err) {
       console.error(err);
@@ -28,22 +30,49 @@ module.exports = {
   },
 
   postAddProduct: async (req, res) => {
-    const { productname, category, price, model, discription, rating, stock } =
+    const { productname, category, price, model, description, rating, stock ,isListed,fData } =
       req.body;
+      
+
+     console.log('the cropped image data',fData)
+     
+    if (fData) {
+      console.log("reached inside the cropped image if condition")
+      
+        try {
+            // Save the cropped image data to the file system or a storage service
+            // Example: Save the cropped image data to a file
+            const imageBuffer = Buffer.from(fData.split(',')[1], 'base64');
+            const imagePath = path.join('public', 'uploads', `${Date.now()}-product-image.jpg`);
+            fs.writeFileSync(imagePath, imageBuffer);
+
+            // Add the image path to the product data
+           
+        } catch (err) {
+            console.error('Error saving cropped image:', err);
+            // You can also return an error response to the client  
+            return res.status(500).send('Error saving cropped image');
+        }
+    }
+  
+
     const newProduct = new Product({
       productname: productname,
       category: category,
       price: price,
       model: model,
-      description: discription,
-      image: req.files.map((file) => file.path.substring(6)),
+      description: description,
+      image: fData ,  
       stock: stock,
-      isListed: true,
+      isListed: isListed,
     });
+
 
     newProduct.save();
     res.redirect("/admin/productmanagement");
   },
+
+
 
   getEditProduct: async (req, res) => {
     try {

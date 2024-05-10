@@ -104,6 +104,19 @@ module.exports = {
     }
   },
 
+
+  getProduct: async (req, res) => {
+    try {
+      const product = await Product.findOne({ _id: req.params.id });
+      const category = await Category.findOne({ _id: product.category })
+     
+      res.render("userViews/productPreview", { product, userId: req.session.userId });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Failed to get productpage.");
+    }
+  },
+
   getRegistration: (req, res) => {
     try {
       res.render("userViews/userSignup",{message:null});
