@@ -111,7 +111,7 @@ module.exports = {
 
   getAddCategory: async (req, res) => {
     try {
-      res.render("adminViews/addCategory");
+      res.render("adminViews/addCategory",{placeholder:null});
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to get category edit page.");
@@ -119,30 +119,27 @@ module.exports = {
   },
 
   postAddCategory: async (req, res) => {
-    
-    const newcategoryname = req.body.newcategoryname.trim().toLowerCase();
-    const checkingForSameCategoryInDB = await Category.findOne({ category: newcategoryname })
+    const newCategoryName = req.body.newcategoryname.trim().toLowerCase();
 
     try {
-      if (checkingForSameCategoryInDB) {
-      return  res.render("adminViews/editCategory", {placeholder:"Please use another name : )", category:null,id:id, message: "Category name already exists please choose another name" })
-      } else {
+        // Check if the category already exists
+        const checkingForSameCategoryInDB = await Category.findOne({ category: newCategoryName });
 
-        
+        if (checkingForSameCategoryInDB) {
+            return res.render("adminViews/addCategory", { placeholder: "Please use another name : )", message: "Category name already exists, please choose another name" });
+        } else {
+            // Save the new category
+            const newCategory = await Category.create({ category: newCategoryName });
+            console.log("New category saved:", newCategory);
+        }
 
-        await Category.updateOne(
-          { _id: id },
-          { $set: { category: newcategoryname } }
-        );
-
-      }
-      
+        res.redirect("/admin/categorymanagement");
     } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to edit category.");
+        console.error(err);
+        return res.status(500).send("Failed to add category.");
     }
-    res.redirect("/admin/categorymanagement");
-  },
+},
+
 
 
   getDeleteCategory: async (req, res) => {
