@@ -125,7 +125,10 @@ module.exports = {
         // Check if the category already exists
         const checkingForSameCategoryInDB = await Category.findOne({ category: newCategoryName });
 
-        if (checkingForSameCategoryInDB) {
+        if(newCategoryName === '') {
+          return res.render("adminViews/addCategory", { placeholder: "Please enter a category name : )", message: "Please enter a category name" });
+
+        }else if (checkingForSameCategoryInDB) {
             return res.render("adminViews/addCategory", { placeholder: "Please use another name : )", message: "Category name already exists, please choose another name" });
         } else {
             // Save the new category
@@ -172,15 +175,28 @@ module.exports = {
 
   postEditCategory: async (req, res) => {
     const id = req.params.id;
+    
+
     const newcategoryname = req.body.newcategoryname.trim().toLowerCase();
+    
+    const gettingTheCategoryWithId = await Category.findOne({_id:id});
+    const ifUserEnteredTheSameCategoryNameAgain = gettingTheCategoryWithId.category === newcategoryname
+
+
     const checkingForSameCategoryInDB = await Category.findOne({ category: newcategoryname })
 
     try {
-      if (checkingForSameCategoryInDB) {
+      if(newcategoryname === '') {
+        return res.render("adminViews/editCategory", {placeholder:"Please enter a category name : )", category:null,id:id, message: "Please enter a category name" })
+
+      } else if(ifUserEnteredTheSameCategoryNameAgain){
+        return res.render("adminViews/editCategory", {placeholder:"Same Name...!", category:null,id:id, message: "You have entered the same name again please go back if you don't want to change the name" })
+
+      }else if   (checkingForSameCategoryInDB) {
       return  res.render("adminViews/editCategory", {placeholder:"Please use another name : )", category:null,id:id, message: "Category name already exists please choose another name" })
       } else {
 
-        
+       
 
         await Category.updateOne(
           { _id: id },
