@@ -1,5 +1,4 @@
 
-
 function validateForm() {
   let isValid = true;
 
@@ -22,18 +21,25 @@ function validateForm() {
   // Category validation
   if (category === "") {
     document.getElementById("categoryError").innerText =
-      "Please enter the category";
+      "Please select the category from the options";
     isValid = false;
   } else {
     document.getElementById("categoryError").innerText = "";
   }
 
   // Price validation
-  if (price === "") {
+  
+  if(price === "") {
     document.getElementById("priceError").innerText =
-      "Please enter the price";
+      "Please enter a price..";
     isValid = false;
-  } else if (parseInt(price) <= 0) {
+  }else if(isNaN(price)){
+    document.getElementById("priceError").innerText =
+      "Only numbers are allowed";
+    isValid = false;
+
+  }
+  else if (parseInt(price) <= 0) {
     document.getElementById("priceError").innerText =
       "Price should be greater than 0";
     isValid = false;
@@ -64,11 +70,20 @@ function validateForm() {
     document.getElementById("stockError").innerText =
       "Please add the stock";
     isValid = false;
+  }else if(isNaN(stock)){
+    document.getElementById("stockError").innerText =
+      "Only numbers are allowed";
+    isValid = false;
+
+  } else if(stock < 0){
+    document.getElementById("stockError").innerText =
+      "Stock can be 0 or greater";
+    isValid = false;
+
   } else {
     document.getElementById("stockError").innerText = "";
   }
 
   return isValid;
 }
-
 

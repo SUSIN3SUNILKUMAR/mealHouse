@@ -23,6 +23,7 @@ module.exports = {
   },
 
   postLogin: (req, res) => {
+   
     const { username, password } = req.body;
     const admin = {
       username: "susin",
@@ -211,35 +212,4 @@ module.exports = {
     }
     res.redirect("/admin/categorymanagement");
   },
-
-
-
-
-
-  getUnlistProduct: async (req, res) => {
-    const product = await Product.findOne({ _id: req.params.id });
-    try {
-      product.isListed = !product.isListed;
-      product.save();
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Error changing product status");
-    }
-    res.redirect("/admin/productmanagement");
-  },
-
-
-  getDeleteImage: async (req, res) => {
-    try {
-      const id = req.body.productid;
-      const index = req.body.index;
-      const product = await Product.findById(id);
-      product.image.splice(index, 1)
-      await product.save()
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Failed to display the page.");
-    }
-  },
-
 };

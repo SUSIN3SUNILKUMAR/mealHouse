@@ -79,7 +79,10 @@ module.exports = {
       const product = await Product.findOne({ _id: req.params.id }).populate(
         "category"
       );
-      const categories = await Category.find();
+      console.log('this is the product', product)
+      const categories = await Category.find().ne('_id',product.category._id);
+      console.log('this is the category',categories)
+      
       res.render("adminViews/editproduct", { product, categories });
     } catch (err) {
       console.error(err);
@@ -119,6 +122,32 @@ module.exports = {
       return res.status(500).send("Error changing product status");
     }
     res.redirect("/admin/productmanagement");
+  },
+
+  getUnlistProduct: async (req, res) => {
+    const product = await Product.findOne({ _id: req.params.id });
+    try {
+      product.isListed = !product.isListed;
+      product.save();
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Error changing product status");
+    }
+    res.redirect("/admin/productmanagement");
+  },
+
+
+  getDeleteImage: async (req, res) => {
+    try {
+      const id = req.body.productid;
+      const index = req.body.index;
+      const product = await Product.findById(id);
+      product.image.splice(index, 1)
+      await product.save()
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Failed to display the page.");
+    }
   },
 
 };

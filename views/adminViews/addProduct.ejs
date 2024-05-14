@@ -16,6 +16,9 @@
     .error-message {
       color: red;
     }
+    .image-preview-container{
+      display: none;
+    }
 
 
   </style>
@@ -43,13 +46,13 @@
 
               <div class="mb-3">
                 <label for="productname" class="form-label">Product Name</label>
-                <input type="text" class="form-control" id="productname" name="productname" required />
+                <input type="text" class="form-control" id="productname" name="productname" placeholder="Enter the name of the product" required />
                 <div id="productnameError" class="error-message"></div>
               </div>
               <div class="mb-4">
                 <label for="category" class="form-label">Category</label>
                 <select class="form-select" id="category" name="category" required>
-                  <option value="">Select Category</option>
+                  <option value="">Please Select a Category</option>
                   <% if(categories.length> 0) { %> <% categories.forEach(
                     categorie=> { %>
                   <option value="<%= categorie._id %>">
@@ -61,7 +64,7 @@
               </div>
               <div class="mb-3">
                 <label for="price" class="form-label">Price</label>
-                <input type="number" class="form-control" id="price" name="price" required />
+                <input type="text" class="form-control" id="price" name="price" placeholder="Enter only positive numbers ..!" required />
                 <div id="priceError" class="error-message"></div>
               </div>
 
@@ -82,7 +85,7 @@
                 </div>
 
 
-
+                <label for="img">Image</label>
                 <input type="file" class="form-control" id="img" name="img" accept="image/*" required />
                 <div id="imgError" class="error-message"></div>
               </div>
@@ -91,7 +94,7 @@
 
               <div class="mb-3">
                 <label for="stock" class="form-label">Stock</label>
-                <input type="number" class="form-control" id="stock" name="stock" min="1" required />
+                <input type="text" class="form-control" id="stock" name="stock" min="1" placeholder="Enter positive values only" required />
                 <div id="stockError" class="error-message"></div>
               </div>
               <div class="mb-4">
@@ -114,166 +117,19 @@
     </div>
   </div>
 
-  <script>
-
-
-    function validateForm() {
-      let isValid = true;
-    
-      const productname = document.getElementById("productname").value.trim();
-      const category = document.getElementById("category").value.trim();
-      const price = document.getElementById("price").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const image = document.getElementById("img").files[0];
-      const stock = document.getElementById("stock").value.trim();
-    
-      // Product Name validation
-      if (productname === "") {
-        document.getElementById("productnameError").innerText =
-          "Please enter the product name";
-        isValid = false;
-      } else {
-        document.getElementById("productnameError").innerText = "";
-      }
-    
-      // Category validation
-      if (category === "") {
-        document.getElementById("categoryError").innerText =
-          "Please enter the category";
-        isValid = false;
-      } else {
-        document.getElementById("categoryError").innerText = "";
-      }
-    
-      // Price validation
-      if (price === "") {
-        document.getElementById("priceError").innerText =
-          "Please enter the price";
-        isValid = false;
-      } else if (parseInt(price) <= 0) {
-        document.getElementById("priceError").innerText =
-          "Price should be greater than 0";
-        isValid = false;
-      } else {
-        document.getElementById("priceError").innerText = "";
-      }
-    
-      // Description validation
-      if (description === "") {
-        document.getElementById("descriptionError").innerText =
-          "Please enter the description";
-        isValid = false;
-      } else {
-        document.getElementById("descriptionError").innerText = "";
-      }
-    
-      // Image validation
-      if (!image) {
-        document.getElementById("imgError").innerText =
-          "Please add the image";
-        isValid = false;
-      } else {
-        document.getElementById("imgError").innerText = "";
-      }
-    
-      // Stock validation
-      if (stock === "") {
-        document.getElementById("stockError").innerText =
-          "Please add the stock";
-        isValid = false;
-      } else {
-        document.getElementById("stockError").innerText = "";
-      }
-    
-      return isValid;
-    }
-
-    
-    
-    
-    </script>
+ 
     
 
 
 
 
 
-  <script>
-    window.onload = function() {
-      const imagePreview = document.getElementById("image-preview");
-      const imageInput = document.getElementById("img");
-      let cropper;
-      console.log("this is below the cropper declaratoin ... within the window.onload")
 
-      imageInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          console.log("this is the image called file: ", file);
-          const reader = new FileReader();
-          reader.onload = () => {
-            if (cropper) {
-              cropper.destroy();
-            }
-            imagePreview.src = reader.result;
-             console.log('this is the image previedw of cropper instance', imagePreview)
-            cropper = new Cropper(imagePreview, { 
-            
-              aspectRatio: 1, // Set the desired aspect ratio for cropping
-              viewMode: 2, // Set the view mode (0: no restrictions, 1: horizontal, 2: vertical, 3: both)
-              guides: true, // Show crop guides
-              autoCropArea: 0.8, // Set the initial crop area size (0 to 1)
-              movable: true, // Enable moving the crop box
-              zoomable: true, // Enable zooming
-              rotatable: true, // Enable rotation
-              scalable: true, // Enable scaling
-              cropBoxMovable: true, // Enable moving the crop box
-              cropBoxResizable: true, // Enable resizing the crop box  
-            });
-          };
-          
-          reader.readAsDataURL(file);
-        }
-      });
-      function getCroppedImage() {
-      
-      console.log("the getCroppedImage function reached");
-      if (cropper) {
-        console.log("inside the if condition")
-        const croppedCanvas = cropper.getCroppedCanvas();
-        const croppedImageData = croppedCanvas.toDataURL("image/jpeg");
-        document.getElementById("fData").value = croppedImageData;
-        console.log("Cropped Image Data:", croppedImageData);
-        return true;
-      }
-      console.log("No cropper instance found.");
-      return false;
-    } 
-
-    const form = document.querySelector("form");
-   
-   form.addEventListener("submit", (event) => {
-     if (!validateForm()) {
-       console.log("inside the if function") 
-       event.preventDefault(); // Prevent form submission if validation fails
-     } else {
-       console.log("inside else function")
-       if (getCroppedImage()) {
-         // If image cropping is successful, proceed with form submission
-         console.log("REACHED INSIDE THE GETCROPPEDIMAGE FUNCTION"); 
-         return true;
-       } else {
-         event.preventDefault(); // Prevent form submission if image cropping fails
-       }
-     }
-   });  
-    };
-
-
-  </script>
+  <script src="/js/adminSide/forImageCropping.js"></script>
 
 
 
-
+<script src="/js/adminSide/Add&EditProductFormValidation/add&EditProductFormValidation.js"></script>
 
 
 </body>
