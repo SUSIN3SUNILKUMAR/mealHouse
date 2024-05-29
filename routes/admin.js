@@ -71,7 +71,6 @@ router.get("/deletecategory/:id", controller.getDeleteCategory)
 router.get("/editcategory/:id",controller.getEditCategory)
 router.post("/editcategory/:id",controller.postEditCategory)
 
-//! Image management routes
-router.post('/deleteimage',controller.getDeleteImage)
+
 
 module.exports = router;

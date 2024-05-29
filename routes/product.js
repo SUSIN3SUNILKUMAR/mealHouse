@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
     );
   },
 });
-const upload = multer({ storage: storage }).array('img', 4);
+const upload = multer({ storage: storage }).array('img', 10);
 
 const checkSession = async (req, res, next) => {
     if (req.session.admin) {
@@ -36,5 +36,7 @@ router.post("/addproduct", upload, controller.postAddProduct);
 router.get("/editproduct/:id", checkSession, controller.getEditProduct);
 router.post("/editproduct/:id", upload, controller.postEditProduct);
 router.get("/unlistproduct/:id", controller.getUnlistProduct);
+router.get("/deleteimageofproduct", controller.getDeleteImage);
 
 module.exports = router;
+  

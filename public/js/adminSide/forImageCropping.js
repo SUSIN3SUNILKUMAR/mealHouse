@@ -1,71 +1,135 @@
-window.onload = function() {
-    const imagePreview = document.getElementById("image-preview");
-    const imageInput = document.getElementById("img");
-    const imagePreviewContainer = document.querySelector(".image-preview-container");
-
-    let cropper;
-    console.log("this is below the cropper declaratoin ... within the window.onload")
-
-    imageInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        imagePreviewContainer.style.display = "block";
-        console.log("this is the image called file: ", file);
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (cropper) {
-            cropper.destroy();
-          }
-          imagePreview.src = reader.result;
-           console.log('this is the image previedw of cropper instance', imagePreview)
-          cropper = new Cropper(imagePreview, { 
-          
-            aspectRatio: 1, // Set the desired aspect ratio for cropping
-            viewMode: 2, // Set the view mode (0: no restrictions, 1: horizontal, 2: vertical, 3: both)
-            guides: true, // Show crop guides
-            autoCropArea: 1, // Set the initial crop area size (0 to 1)
-            movable: true, // Enable moving the crop box
-            zoomable: true, // Enable zooming
-            rotatable: true, // Enable rotation
-            scalable: true, // Enable scaling
-            cropBoxMovable: true, // Enable moving the crop box
-            cropBoxResizable: true, // Enable resizing the crop box  
-          });
-        };
+ const imageContainer = document.getElementById('image-container');
+          let croppers = [];
+          let croppedImagesData = []; // Array to store cropped image data
+          let isSaveClicked = false; // Flag to track if the Save button is clicked
         
-        reader.readAsDataURL(file);
-      }
-    });
-    function getCroppedImage() {
-    
-    console.log("the getCroppedImage function reached");
-    if (cropper) {
-      console.log("inside the if condition")
-      const croppedCanvas = cropper.getCroppedCanvas();
-      const croppedImageData = croppedCanvas.toDataURL("image/jpeg");
-      document.getElementById("fData").value = croppedImageData;
-      console.log("Cropped Image Data:", croppedImageData);
-      return true;
-    }
-    console.log("No cropper instance found.");
-    return false;
-  } 
+          document.getElementById('image').addEventListener('change', (event) => {
+            const files = event.target.files;
+        
+            for (const file of files) {
+              const reader = new FileReader();
+        
+              reader.onload = (event) => {
+                const image = new Image(); 
+                image.src = event.target.result;
+        
+                image.onload = () => {
+                  const containerDiv = document.createElement('div');
+                  containerDiv.className = 'image-container';
+        
+                  const imageElement = document.createElement('img');
+                  imageElement.src = image.src;
+                  containerDiv.appendChild(imageElement);
+        
+                  // Set a fixed height for the container
+                  containerDiv.style.height = '200px';
+                  
+        
+                  // Create a new Cropper for each image without a fixed aspect ratio
+                  const cropper = new Cropper(imageElement, {
+                    aspectRatio: NaN, // Allow freeform cropping
+                    viewMode: 1, // Set the cropping mode (0: freeform, 1: restrict to the aspect ratio)
+                  });
+        
+                  // Create a "Save" button for each image
+                  const saveButton = document.createElement('button');
+                  saveButton.className = 'btn btn-success save-button';
+                  saveButton.textContent = 'Save';
+                  saveButton.addEventListener('click', () => {
+                    // Get the cropped image data for the specific cropper
+                    const croppedCanvas = cropper.getCroppedCanvas();
+                   const blob  = croppedCanvas.toBlob((blob) => {
+                    croppedImageBlobs.push(blob)
 
-  const form = document.querySelector("form");
- 
- form.addEventListener("submit", (event) => {
-   if (!validateForm()) {
-     console.log("inside the if function") 
-     event.preventDefault(); // Prevent form submission if validation fails
-   } else {
-     console.log("inside else function")
-     if (getCroppedImage()) {
-       // If image cropping is successful, proceed with form submission
-       console.log("REACHED INSIDE THE GETCROPPEDIMAGE FUNCTION"); 
-       return true;
-     } else {
-       event.preventDefault(); // Prevent form submission if image cropping fails
-     }
-   }
- });  
-  };
+                   },'image/jpeg',1) // Use 'image/jpeg' MIME type for JPEG images
+        
+                    // Store cropped image data in the array
+                    croppedImagesData.push(blob);
+        
+                    // Optionally, you can remove the "Save" button after saving
+                    containerDiv.removeChild(saveButton);
+        
+                    // Set the flag to indicate that Save button is clicked
+                    isSaveClicked = true;
+                  });
+        
+                  // Create a "Remove" button for each image
+                  const removeButton = document.createElement('button');
+                  removeButton.className = 'btn btn-danger remove-button';
+                  removeButton.textContent = 'Remove';
+                  removeButton.addEventListener('click', () => {
+                    // Remove the corresponding image and cropper
+                    const index = croppers.indexOf(cropper);
+                    if (index !== -1) {
+                      croppers.splice(index, 1);
+                      croppedImagesData.splice(index, 1);
+                    }
+                    containerDiv.remove();
+        
+                    // Reset the flag if there are no images left
+                    if (croppers.length === 0) {
+                      isSaveClicked = false;
+                    }
+                  });
+        
+                  containerDiv.appendChild(saveButton);
+                  containerDiv.appendChild(removeButton);
+        
+                  imageContainer.appendChild(containerDiv);
+                  croppers.push(cropper);
+                };
+              };
+        
+              reader.readAsDataURL(file);
+            }
+          });
+        
+          // Handle form submission (for adding product)
+          const form = document.querySelector("form");
+         form.addEventListener('submit',  (event) => {
+            if(!validateForm()){
+              event.preventDefault()
+            }
+             if (!isSaveClicked) {
+              event.preventDefault();
+              // Show validation message
+              document.getElementById('validationMessage').textContent = 'Please save the image first.';
+            } else {
+              // Add the cropped image data to the form data
+              croppedImagesData.forEach((croppedImageData, index) => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = `croppedImages[${index}]`;   
+                hiddenInput.value = croppedImageData;
+                document.querySelector('form').appendChild(hiddenInput);
+              });
+        
+              // Optionally, you can also reset the croppers and image containers
+              resetCroppersAndContainers();
+            }
+          });
+        
+          // Function to reset croppers and containers
+          function resetCroppersAndContainers() {
+            // Reset the croppers array
+            croppers = [];
+        
+            // Remove all child elements from the imageContainer
+            while (imageContainer.firstChild) {
+              imageContainer.removeChild(imageContainer.firstChild);
+            }
+        
+            // Clear the file input
+            const fileInput = document.getElementById('image');
+            fileInput.value = '';
+        
+            // Clear the cropped image data array
+            croppedImagesData = [];
+        
+            // Reset the Save button click flag
+            isSaveClicked = false;
+        
+            // Clear the validation message
+            document.getElementById('validationMessage').textContent = '';
+          } 
+         

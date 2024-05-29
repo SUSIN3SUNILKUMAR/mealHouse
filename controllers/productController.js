@@ -7,15 +7,6 @@ const fs = require('fs');
 
 module.exports = {
 
-  getAddProduct: async (req, res) => {
-    try {
-      const categories = await Category.find();
-      res.render("adminViews/addProduct", { categories });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Error getting addproduct page");
-    }
-  },
 
   getProductManagement: async (req, res) => {
     try {
@@ -28,50 +19,45 @@ module.exports = {
       return res.status(500).send("Failed to get products. please try again");
     }
   },
+  getAddProduct: async (req, res) => {
+    try {
+      const categories = await Category.find();
+      res.render("adminViews/addProduct", { categories });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Error getting addproduct page");
+    }
+  },
+
 
   postAddProduct: async (req, res) => {
-    const { productname, category, price, model, description, rating, stock ,isListed,fData } =
-      req.body;
-      
-
-     console.log('the cropped image data',fData)
-     
-    if (fData) {
-      console.log("reached inside the cropped image if condition")
-      
-        try {
-            // Save the cropped image data to the file system or a storage service
-            // Example: Save the cropped image data to a file
-            const imageBuffer = Buffer.from(fData.split(',')[1], 'base64');
-            const imagePath = path.join('public', 'uploads', `${Date.now()}-product-image.jpg`);
-            fs.writeFileSync(imagePath, imageBuffer);
-
-            // Add the image path to the product data
-           
-        } catch (err) {
-            console.error('Error saving cropped image:', err);
-            // You can also return an error response to the client  
-            return res.status(500).send('Error saving cropped image');
-        }
-    }
+    const { productname, category, price, description,Stock, isListed, croppedImages } = req.body;
   
-
+   
+  console.log("body",req.body)
+    
+  
     const newProduct = new Product({
       productname: productname,
       category: category,
       price: price,
-      model: model,
+      
       description: description,
-      image: fData ,  
-      stock: stock,
+      image:croppedImages|| [], // Now imagePathForDB is accessible here
+      stock: Stock,
       isListed: isListed,
     });
-
-
-    newProduct.save();
-    res.redirect("/admin/productmanagement");
-  },
-
+  
+    try {
+      await newProduct.save(); // Await saving the new product to the database
+      res.redirect("/admin/productmanagement");
+    } catch (error) {
+      console.error('Error saving product to database:', error);
+      return res.status(500).send('Error saving product to database');
+    }
+  }
+  
+,
 
 
   getEditProduct: async (req, res) => {
@@ -79,9 +65,11 @@ module.exports = {
       const product = await Product.findOne({ _id: req.params.id }).populate(
         "category"
       );
-      console.log('this is the product', product)
+     
+      console.log("this is a product Catogory",product.category)
+      console.log('this is a product Image',product.image)
       const categories = await Category.find().ne('_id',product.category._id);
-      console.log('this is the category',categories)
+     
       
       res.render("adminViews/editproduct", { product, categories });
     } catch (err) {
@@ -98,7 +86,6 @@ module.exports = {
     product.productname = req.body.productname;
     product.category = req.body.category;
     product.price = req.body.price;
-    product.model = req.body.model;
     product.description = req.body.description;
     product.stock = req.body.stock;
     product.isListed = req.body.isListed;
@@ -124,17 +111,6 @@ module.exports = {
     res.redirect("/admin/productmanagement");
   },
 
-  getUnlistProduct: async (req, res) => {
-    const product = await Product.findOne({ _id: req.params.id });
-    try {
-      product.isListed = !product.isListed;
-      product.save();
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Error changing product status");
-    }
-    res.redirect("/admin/productmanagement");
-  },
 
 
   getDeleteImage: async (req, res) => {
@@ -149,5 +125,4 @@ module.exports = {
       return res.status(500).send("Failed to display the page.");
     }
   },
-
 };

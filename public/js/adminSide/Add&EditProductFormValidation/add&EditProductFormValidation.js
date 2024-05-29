@@ -1,12 +1,12 @@
-
 function validateForm() {
   let isValid = true;
+  console.log("readched inside the validate formf")
 
   const productname = document.getElementById("productname").value.trim();
   const category = document.getElementById("category").value.trim();
   const price = document.getElementById("price").value.trim();
   const description = document.getElementById("description").value.trim();
-  const image = document.getElementById("img").files[0];
+  const image = document.getElementById("image").files[0]; // Ensure this ID matches your file input ID
   const stock = document.getElementById("stock").value.trim();
 
   // Product Name validation
@@ -28,18 +28,15 @@ function validateForm() {
   }
 
   // Price validation
-  
-  if(price === "") {
+  if (price === "") {
     document.getElementById("priceError").innerText =
       "Please enter a price..";
     isValid = false;
-  }else if(isNaN(price)){
+  } else if (isNaN(price)) {
     document.getElementById("priceError").innerText =
       "Only numbers are allowed";
     isValid = false;
-
-  }
-  else if (parseInt(price) <= 0) {
+  } else if (parseInt(price) <= 0) {
     document.getElementById("priceError").innerText =
       "Price should be greater than 0";
     isValid = false;
@@ -52,15 +49,20 @@ function validateForm() {
     document.getElementById("descriptionError").innerText =
       "Please enter the description";
     isValid = false;
+    console.log('from description isvalid' ,isValid)
   } else {
     document.getElementById("descriptionError").innerText = "";
   }
 
   // Image validation
   if (!image) {
+    console.log('entered image validation')
     document.getElementById("imgError").innerText =
       "Please add the image";
+      console.log('entered image validation  2')
     isValid = false;
+    console.log('this is  image isValid',isValid);
+
   } else {
     document.getElementById("imgError").innerText = "";
   }
@@ -70,20 +72,18 @@ function validateForm() {
     document.getElementById("stockError").innerText =
       "Please add the stock";
     isValid = false;
-  }else if(isNaN(stock)){
+  } else if (isNaN(stock)) {
     document.getElementById("stockError").innerText =
       "Only numbers are allowed";
     isValid = false;
-
-  } else if(stock < 0){
+  } else if (stock < 0) {
     document.getElementById("stockError").innerText =
       "Stock can be 0 or greater";
     isValid = false;
-
   } else {
     document.getElementById("stockError").innerText = "";
   }
-
+console.log('this is is valid' ,isValid)
   return isValid;
 }
-
+  
