@@ -72,7 +72,7 @@ module.exports = {
      
       const categories = await Category.find().ne('_id',product.category._id);
       
-     
+     console.log('nothing')
       
       res.render("adminViews/editproduct", { product, categories});
     } catch (err) {
