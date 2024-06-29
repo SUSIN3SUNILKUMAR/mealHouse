@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const userRoute = require('./routes/user')
 const adminRoute = require('./routes/admin')
 const productRoutes = require('./routes/product')
+const flash = require('connect-flash')
 
 
 
@@ -27,7 +28,7 @@ app.use(
     })
 )
 
-
+app.use(flash())
 
 app.use(morgan('tiny'))
 //mongodb connection
@@ -55,7 +56,8 @@ app.use('/admin',productRoutes)
 
 
 
-const port = 3000
+const port = 5000
+
 app.listen(port, () => {
     console.log(`app running on port:${port}`)
-})
+})  

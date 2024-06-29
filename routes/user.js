@@ -5,6 +5,8 @@ const controller = require('../controllers/userController')
 const nocache = require('nocache')
 router.use(nocache())
 
+router.use(express.json())
+
 const checkSessionAndBlocked = async (req, res, next) => {
     if (req.session.userId) {
       const userDetials = await User.findOne({ _id: req.session.userId });
@@ -28,6 +30,18 @@ const checkSessionAndBlocked = async (req, res, next) => {
     }
   };
 
+  const checkSessionOnlyForOtp = (req, res, next) => {
+    if (req.session.userId) {
+      // Session exists, redirect to user home page
+      res.redirect('/userHome');
+    } else {
+      // No session, proceed to the OTP verification page
+      next();
+    }
+  };
+
+
+
 //! Authentication routes
 router.get('/', controller.getLogin)
 router.post('/', controller.postLogin)
@@ -37,13 +51,13 @@ router.get('/userHome', checkSessionAndBlocked, controller.getHome)
 router.get('/product/:id', checkSessionAndBlocked, controller.getProduct)
 
 //!signup routes
-router.get('/userSignup', controller.getRegistration)
-router.post('/userSignup', controller.postRegistration)
-
+router.get('/userSignup',checkSessionOnlyForOtp, controller.getRegistration)
+router.post('/userSignup',checkSessionOnlyForOtp, controller.postRegistration)
+  
 
 //!otpVerification routes
-router.get('/otpVerification', controller.getOtpVerification)
-router.post('/otpVerification', controller.postOtpVerification)
+router.get('/otpVerification',checkSessionOnlyForOtp, controller.getOtpVerification)
+router.post('/otpVerification',checkSessionOnlyForOtp, controller.postOtpVerification)
 router.get('/logout', controller.getLogout)
 
 

@@ -65,13 +65,16 @@ module.exports = {
       const product = await Product.findOne({ _id: req.params.id }).populate(
         "category"
       );
+      
+    
+  
+      console.log("this is a product Category",product.category)
      
-      console.log("this is a product Catogory",product.category)
-      console.log('this is a product Image',product.image)
       const categories = await Category.find().ne('_id',product.category._id);
+      
      
       
-      res.render("adminViews/editproduct", { product, categories });
+      res.render("adminViews/editproduct", { product, categories});
     } catch (err) {
       console.error(err);
       return res.status(500).send("Failed to get product edit page.");

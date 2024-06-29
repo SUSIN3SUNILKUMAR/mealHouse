@@ -109,7 +109,7 @@
         <% if (product.images && product.images.length > 0) { %>
         <% product.images.forEach(image => { %>
         <div class="image-container">
-          <img src="<%= image %>" alt="Product Image">
+          <img src="<%= product.image %>" alt="product.name">
           <button type="button" class="remove-button btn btn-danger btn-sm" onclick="removeImage('<%= image %>')">Remove</button>
         </div>
         <% }); %>
